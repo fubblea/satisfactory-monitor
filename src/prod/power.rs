@@ -17,6 +17,7 @@ pub struct PowerProdLogger {
 struct PowerProdData {
     battery_capacity: f64,
     power_consumed: f64,
+    power_production: f64,
 }
 
 impl ProdLogger for PowerProdLogger {
@@ -34,10 +35,18 @@ impl ProdLogger for PowerProdLogger {
         };
 
         rec.log_static(
-            logger.channel.clone(),
+            format!("{}/power_consumption", logger.channel.clone()),
             &rerun::SeriesLine::new()
                 .with_color([255, 0, 0])
                 .with_name("Power Consumption"),
+        )
+        .unwrap();
+
+        rec.log_static(
+            format!("{}/power_production", logger.channel.clone()),
+            &rerun::SeriesLine::new()
+                .with_color([0, 255, 0])
+                .with_name("Power Production"),
         )
         .unwrap();
 
@@ -55,13 +64,22 @@ impl ProdLogger for PowerProdLogger {
             .await
             .unwrap();
 
-        self.rec.set_time_seconds("sim_time", time_step);
+        self.rec
+            .set_time_seconds(super::GLOBAL_TIME_CHAN, time_step);
 
         self.rec
             .clone()
             .log(
-                self.channel.clone(),
+                format!("{}/power_consumption", self.channel.clone()),
                 &rerun::Scalar::new(resp[0].power_consumed),
+            )
+            .unwrap();
+
+        self.rec
+            .clone()
+            .log(
+                format!("{}/power_production", self.channel.clone()),
+                &rerun::Scalar::new(resp[0].power_production),
             )
             .unwrap();
     }

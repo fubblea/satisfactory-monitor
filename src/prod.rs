@@ -5,6 +5,8 @@ use rerun::RecordingStream;
 
 pub mod power;
 
+const GLOBAL_TIME_CHAN: &str = "sim_time";
+
 pub trait ProdLogger {
     fn from_client(
         client: Arc<Client>,
